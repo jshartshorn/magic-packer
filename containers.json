@@ -1,0 +1,8 @@
+[{
+  "Description": "MagicAI Ubuntu OVA",
+  "Format": "ova",
+  "UserBucket": {
+    "S3Bucket": "coderazor-images",
+    "S3Key": "packer-import-1536020664.ova"
+  }
+}]

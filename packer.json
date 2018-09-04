@@ -1,0 +1,97 @@
+{
+  "variables": {
+    "vm_name": "",
+    "cpu": "2",
+    "ram_size": "2048",
+    "disk_size": "21440",
+    "iso_file": "ubuntu-1604-unattended.iso",
+    "checksum": "7ec7121f026b872fabfbb25fb2dc71ec",
+    "checksum_type": "md5",
+    "non_gui": "true",
+    "username": "ubuntu",
+    "password": "ubuntu",
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+  "builders": [{
+    "vm_name": "{{user `vm_name`}}",
+    "type": "virtualbox-iso",
+    "format": "ova",
+    "keep_registered": "true",
+    "boot_wait": "5s",
+    "http_directory": "http",
+    "disk_size": "{{user `disk_size`}}",
+    "headless": true,
+    "guest_additions_mode": "disable",
+    "iso_url": "{{user `iso_file`}}",
+    "iso_checksum_type": "{{user `checksum_type`}}",
+    "iso_checksum": "{{user `checksum`}}",
+    "communicator": "ssh",
+    "ssh_username": "{{user `username`}}",
+    "ssh_password": "{{user `password`}}",
+    "ssh_timeout": "4h",
+    "shutdown_command": "echo 'vagrant' | sudo -S -E shutdown -P now",
+    "boot_command": [
+      "<enter><wait>",
+      "<f6><esc>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+      "<bs><bs><bs>",
+      "/install/vmlinuz ",
+      "initrd=/install/initrd.gz ",
+      "net.ifnames=0 ",
+      "auto-install/enable=true ",
+      "debconf/priority=critical ",
+      "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/preseed.cfg",
+      "<enter>"
+    ],
+    "ssh_timeout": "60m",
+    "ssh_username": "ubuntu",
+    "ssh_password": "ubuntu",
+    "shutdown_command": "sudo systemctl poweroff",
+    "guest_os_type": "Ubuntu_64",
+    "vboxmanage": [
+      [
+        "modifyvm", "{{.Name}}", "--memory", "{{user `ram_size`}}"
+      ],
+      [
+        "modifyvm", "{{.Name}}", "--cpus", "{{user `cpu`}}"
+      ]
+    ]
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "execute_command": "echo 'vagrant' | sudo -S -E sh {{.Path}}",
+    "scripts": [
+      "./linux/ubuntu/update.sh",
+      "./linux/ubuntu/network.sh",
+      "./linux/common/vagrant.sh",
+      "./linux/common/chef.sh",
+      "./linux/common/motd.sh",
+      "./linux/ubuntu/cleanup.sh"
+    ]
+  }],
+  "post-processors": [{
+      "type": "vagrant",
+      "keep_input_artifact": false,
+      "output": "{{.Provider}}_ubuntu-16.04_chef.box"
+    },
+    {
+      "type": "amazon-import",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-west-2",
+      "s3_bucket_name": "coderazor-images",
+      "license_type": "BYOL",
+      "tags": {
+        "Description": "packer amazon import "
+        }
+      }
+    ]
+  }

@@ -1,0 +1,10 @@
+[
+  {
+    "Description": "magic",
+    "Format": "vmdk",
+    "UserBucket": {
+        "S3Bucket": "coderazor-images",
+        "S3Key": "disks/magic.vmdk"
+    }
+  }
+]
