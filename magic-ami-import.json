@@ -8,8 +8,8 @@
     "checksum": "7ec7121f026b872fabfbb25fb2dc71ec",
     "checksum_type": "md5",
     "non_gui": "true",
-    "username": "ubuntu",
-    "password": "ubuntu",
+    "username": "",
+    "password": "",
     "aws_access_key": "",
     "aws_secret_key": ""
   },
@@ -18,19 +18,15 @@
     "type": "virtualbox-iso",
     "format": "ova",
     "keep_registered": "true",
-    "boot_wait": "5s",
-    "http_directory": "http",
-    "disk_size": "{{user `disk_size`}}",
-    "headless": true,
-    "guest_additions_mode": "disable",
+    "guest_os_type": "Ubuntu_64",
     "iso_url": "{{user `iso_file`}}",
     "iso_checksum_type": "{{user `checksum_type`}}",
     "iso_checksum": "{{user `checksum`}}",
-    "communicator": "ssh",
-    "ssh_username": "{{user `username`}}",
-    "ssh_password": "{{user `password`}}",
-    "ssh_timeout": "4h",
-    "shutdown_command": "echo 'vagrant' | sudo -S -E shutdown -P now",
+    "output_directory": "output_{{user `vm_name`}}",
+    "disk_size": 15000,
+    "headless": "true",
+    "http_directory": "http",
+    "boot_wait": "5s",
     "boot_command": [
       "<enter><wait>",
       "<f6><esc>",
@@ -55,43 +51,20 @@
     "ssh_username": "ubuntu",
     "ssh_password": "ubuntu",
     "shutdown_command": "sudo systemctl poweroff",
-    "guest_os_type": "Ubuntu_64",
     "vboxmanage": [
-      [
-        "modifyvm", "{{.Name}}", "--memory", "{{user `ram_size`}}"
-      ],
-      [
-        "modifyvm", "{{.Name}}", "--cpus", "{{user `cpu`}}"
-      ]
-    ]
-  }],
-  "provisioners": [{
-    "type": "shell",
-    "execute_command": "echo 'vagrant' | sudo -S -E sh {{.Path}}",
-    "scripts": [
-      "./linux/ubuntu/update.sh",
-      "./linux/ubuntu/network.sh",
-      "./linux/common/vagrant.sh",
-      "./linux/common/chef.sh",
-      "./linux/common/motd.sh",
-      "./linux/ubuntu/cleanup.sh"
+      ["modifyvm", "{{.Name}}", "--memory", 512],
+      ["modifyvm", "{{.Name}}", "--cpus", 1]
     ]
   }],
   "post-processors": [{
-      "type": "vagrant",
-      "keep_input_artifact": false,
-      "output": "{{.Provider}}_ubuntu-16.04_chef.box"
-    },
-    {
-      "type": "amazon-import",
-      "access_key": "{{user `aws_access_key`}}",
-      "secret_key": "{{user `aws_secret_key`}}",
-      "region": "us-west-2",
-      "s3_bucket_name": "coderazor-images",
-      "license_type": "BYOL",
-      "tags": {
-        "Description": "packer amazon import "
-        }
-      }
-    ]
-  }
+    "type": "amazon-import",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-west-2",
+    "s3_bucket_name": "coderazor-images",
+    "license_type": "BYOL",
+    "tags": {
+      "Description": "packer amazon import "
+    }
+  }]
+}

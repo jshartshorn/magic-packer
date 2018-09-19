@@ -19,4 +19,5 @@ build-ami.sh
 build-do.sh
 build-packer.sh
 build-ubuntu.sh
+magic-ami-import.sh
 /.vagrant
